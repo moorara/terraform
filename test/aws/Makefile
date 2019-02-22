@@ -1,5 +1,3 @@
-access_key := $(shell cat terraform.tfvars | grep access_key | grep -oe '".*"')
-secret_key := $(shell cat terraform.tfvars | grep secret_key | grep -oe '".*"')
 region := $(shell cat terraform.tfvars | grep region | grep -oe '".*"')
 environment := $(shell cat terraform.tfvars | grep environment | grep -oe '".*"')
 
