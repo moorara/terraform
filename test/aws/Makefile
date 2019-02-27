@@ -2,10 +2,12 @@ region := $(shell cat terraform.tfvars | grep region | grep -oe '".*"')
 environment := $(shell cat terraform.tfvars | grep environment | grep -oe '".*"')
 
 key_name := bastion-$(environment)
+host := $(shell git remote get-url origin | cut -d@ -f2 | cut -d: -f1)
+repo := $(shell git remote get-url origin | cut -d: -f2 | rev | cut -c5- | rev)
 
 
 clean:
-	@ rm -f *.pub *.pem && \
+	@ rm -f *.pub *.pem $(key_name) && \
 	  rm -rf .terraform terraform.tfstate terraform.tfstate.backup
 
 keys:
@@ -17,16 +19,28 @@ init:
 	@ terraform init
 
 validate:
-	@ terraform validate
+	@ terraform validate \
+	    -var git_commit=$(shell git rev-parse --short HEAD) \
+			-var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
+			-var git_repo="https://$(host)/$(repo)"
 
 plan:
-	@ terraform plan
+	@ terraform plan \
+	    -var git_commit=$(shell git rev-parse --short HEAD) \
+			-var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
+			-var git_repo="https://$(host)/$(repo)"
 
 apply:
-	@ terraform apply
+	@ terraform apply \
+	    -var git_commit=$(shell git rev-parse --short HEAD) \
+			-var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
+			-var git_repo="https://$(host)/$(repo)"
 
 destroy:
-	@ terraform destroy
+	@ terraform destroy \
+	    -var git_commit=$(shell git rev-parse --short HEAD) \
+			-var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
+			-var git_repo="https://$(host)/$(repo)"
 
 
 .PHONY: clean
