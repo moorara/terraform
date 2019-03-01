@@ -4,14 +4,13 @@ resource "aws_vpc" "primary" {
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags {
-    Name        = "${var.name}"
-    Environment = "${var.environment}"
-    Region      = "${var.region}"
-    GitCommit   = "${var.git_commit}"
-    GitBranch   = "${var.git_branch}"
-    GitRepo     = "${var.git_repo}"
-  }
+  tags = "${merge(
+    local.common_tags,
+    map(
+      "Name",   "${var.name}",
+      "Region", "${var.region}"
+    )
+  )}"
 }
 
 # https://www.terraform.io/docs/providers/aws/r/subnet.html
@@ -22,28 +21,26 @@ resource "aws_subnet" "primary" {
   cidr_block              = "${cidrsubnet(aws_vpc.primary.cidr_block, 8, count.index)}"
   map_public_ip_on_launch = false
 
-  tags {
-    Name        = "${var.name}-${count.index}"
-    Environment = "${var.environment}"
-    Region      = "${var.region}"
-    GitCommit   = "${var.git_commit}"
-    GitBranch   = "${var.git_branch}"
-    GitRepo     = "${var.git_repo}"
-  }
+  tags = "${merge(
+    local.common_tags,
+    map(
+      "Name",   "${var.name}-${count.index}",
+      "Region", "${var.region}"
+    )
+  )}"
 }
 
 # https://www.terraform.io/docs/providers/aws/r/internet_gateway.html
 resource "aws_internet_gateway" "primary" {
   vpc_id = "${aws_vpc.primary.id}"
 
-  tags {
-    Name        = "${var.name}"
-    Environment = "${var.environment}"
-    Region      = "${var.region}"
-    GitCommit   = "${var.git_commit}"
-    GitBranch   = "${var.git_branch}"
-    GitRepo     = "${var.git_repo}"
-  }
+  tags = "${merge(
+    local.common_tags,
+    map(
+      "Name",   "${var.name}",
+      "Region", "${var.region}"
+    )
+  )}"
 }
 
 # https://www.terraform.io/docs/providers/aws/r/route.html
@@ -62,14 +59,13 @@ resource "aws_route_table" "internet" {
     gateway_id = "${aws_internet_gateway.primary.id}"
   }
 
-  tags {
-    Name        = "${var.name}-internet"
-    Environment = "${var.environment}"
-    Region      = "${var.region}"
-    GitCommit   = "${var.git_commit}"
-    GitBranch   = "${var.git_branch}"
-    GitRepo     = "${var.git_repo}"
-  }
+  tags = "${merge(
+    local.common_tags,
+    map(
+      "Name",   "${var.name}-internet",
+      "Region", "${var.region}"
+    )
+  )}"
 }
 
 # https://www.terraform.io/docs/providers/aws/r/route_table_association.html
@@ -96,22 +92,21 @@ resource "aws_flow_log" "vpc" {
 
 # https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html
 resource "aws_cloudwatch_log_group" "vpc" {
-  name              = "vpc-${var.name}-${var.environment}"
+  name              = "${var.name}-${var.environment}-vpc"
   retention_in_days = 30
 
-  tags {
-    Name        = "vpc-${var.name}"
-    Environment = "${var.environment}"
-    Region      = "${var.region}"
-    GitCommit   = "${var.git_commit}"
-    GitBranch   = "${var.git_branch}"
-    GitRepo     = "${var.git_repo}"
-  }
+  tags = "${merge(
+    local.common_tags,
+    map(
+      "Name",   "${var.name}-vpc",
+      "Region", "${var.region}"
+    )
+  )}"
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_role.html
 resource "aws_iam_role" "vpc" {
-  name = "vpc-${var.name}-${var.environment}"
+  name = "${var.name}-${var.environment}-vpc"
 
   assume_role_policy = <<EOF
 {
@@ -129,19 +124,17 @@ resource "aws_iam_role" "vpc" {
 }
 EOF
 
-  tags {
-    Name        = "vpc-${var.name}"
-    Environment = "${var.environment}"
-    Region      = "${var.region}"
-    GitCommit   = "${var.git_commit}"
-    GitBranch   = "${var.git_branch}"
-    GitRepo     = "${var.git_repo}"
-  }
+  tags = "${merge(
+    local.common_tags,
+    map(
+      "Name", "${var.name}-vpc",
+    )
+  )}"
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
 resource "aws_iam_role_policy" "vpc" {
-  name = "vpc-${var.name}-${var.environment}"
+  name = "${var.name}-${var.environment}-vpc"
   role = "${aws_iam_role.vpc.id}"
 
   policy = <<EOF

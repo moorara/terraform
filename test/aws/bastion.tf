@@ -16,21 +16,21 @@ data "aws_ami" "debian" {
 
 # https://www.terraform.io/docs/providers/aws/r/key_pair.html
 resource "aws_key_pair" "bastion" {
-  key_name   = "bastion-${var.name}-${var.environment}"
-  public_key = "${file("${path.module}/bastion-${var.environment}.pub")}"
+  key_name   = "${var.name}-${var.environment}-bastion"
+  public_key = "${file("${path.module}/${var.environment}-bastion.pub")}"
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_instance_profile.html
 resource "aws_iam_instance_profile" "bastion" {
-  name = "bastion-${var.name}-${var.environment}"
+  name = "${var.name}-${var.environment}-bastion"
   role = "${aws_iam_role.bastion.name}"
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_role.html
 resource "aws_iam_role" "bastion" {
-  name = "bastion-${var.name}-${var.environment}"
+  name = "${var.name}-${var.environment}-bastion"
 
-    assume_role_policy = <<EOF
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -46,19 +46,17 @@ resource "aws_iam_role" "bastion" {
 }
 EOF
 
-  tags {
-    Name        = "bastion-${var.name}"
-    Environment = "${var.environment}"
-    Region      = "${var.region}"
-    GitCommit   = "${var.git_commit}"
-    GitBranch   = "${var.git_branch}"
-    GitRepo     = "${var.git_repo}"
-  }
+  tags = "${merge(
+    local.common_tags,
+    map(
+      "Name", "${var.name}-bastion",
+    )
+  )}"
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
 resource "aws_iam_role_policy" "bastion" {
-  name = "bastion-${var.name}-${var.environment}"
+  name = "${var.name}-${var.environment}-bastion"
   role = "${aws_iam_role.bastion.name}"
 
   # TODO: restrict access for S3 buckets
@@ -98,24 +96,24 @@ EOF
 
 # https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html
 resource "aws_cloudwatch_log_group" "bastion" {
-  name              = "bastion-${var.name}-${var.environment}"
+  name              = "${var.name}-${var.environment}-bastion"
   retention_in_days = 30
 
-  tags {
-    Name        = "bastion-${var.name}"
-    Environment = "${var.environment}"
-    Region      = "${var.region}"
-    GitCommit   = "${var.git_commit}"
-    GitBranch   = "${var.git_branch}"
-    GitRepo     = "${var.git_repo}"
-  }
+  tags = "${merge(
+    local.common_tags,
+    map(
+      "Name",   "${var.name}-bastion",
+      "Region", "${var.region}"
+    )
+  )}"
 }
 
 # https://www.terraform.io/docs/providers/aws/r/launch_configuration.html
 resource "aws_launch_configuration" "bastion" {
-  name                        = "bastion-${var.name}-${var.environment}"
+  name                        = "${var.name}-${var.environment}-bastion"
   image_id                    = "${data.aws_ami.debian.id}"
   instance_type               = "t2.micro"
+  ebs_optimized               = false
   iam_instance_profile        = "${aws_iam_instance_profile.bastion.id}"
   security_groups             = [ "${aws_security_group.bastion.id}" ]
   key_name                    = "${aws_key_pair.bastion.key_name}"
@@ -128,18 +126,18 @@ resource "aws_launch_configuration" "bastion" {
 
 # https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html
 resource "aws_autoscaling_group" "bastion" {
-  name                 = "bastion-${var.name}-${var.environment}"
+  name                 = "${var.name}-${var.environment}-bastion"
   launch_configuration = "${aws_launch_configuration.bastion.name}"
   vpc_zone_identifier  = [ "${aws_subnet.primary.*.id}" ]
   termination_policies = [ "OldestInstance" ]
 
   min_size         = 1
-  max_size         = 3
+  max_size         = 1
   desired_capacity = 1
 
   tag {
     key                 = "Name"
-    value               = "bastion-${var.name}"
+    value               = "${var.name}-bastion"
     propagate_at_launch = true
   }
 
@@ -152,6 +150,12 @@ resource "aws_autoscaling_group" "bastion" {
   tag {
     key                 = "Region"
     value               = "${var.region}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Owner"
+    value               = "${var.owner}"
     propagate_at_launch = true
   }
 
@@ -180,7 +184,7 @@ resource "aws_autoscaling_group" "bastion" {
 
 # https://www.terraform.io/docs/providers/aws/r/security_group.html
 resource "aws_security_group" "bastion" {
-  name   = "bastion-${var.name}-${var.environment}"
+  name   = "${var.name}-${var.environment}-bastion"
   vpc_id = "${aws_vpc.primary.id}"
 
   ingress {
@@ -208,24 +212,23 @@ resource "aws_security_group" "bastion" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = [ "${aws_vpc.primary.cidr_block}" ]
-  }
-
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
     cidr_blocks = [ "0.0.0.0/0" ]
   }
 
-  tags {
-    Name        = "bastion-${var.name}"
-    Environment = "${var.environment}"
-    Region      = "${var.region}"
-    GitCommit   = "${var.git_commit}"
-    GitBranch   = "${var.git_branch}"
-    GitRepo     = "${var.git_repo}"
-  }
+  /* egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [ "${aws_vpc.primary.cidr_block}" ]
+  } */
+
+  tags = "${merge(
+    local.common_tags,
+    map(
+      "Name",   "${var.name}-bastion",
+      "Region", "${var.region}"
+    )
+  )}"
 
   lifecycle {
     create_before_destroy = true

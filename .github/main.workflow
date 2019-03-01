@@ -8,7 +8,6 @@ action "AWS Tests" {
   secrets = [ "AWS_ACCESS_KEY", "AWS_SECRET_KEY" ]
   env = {
     AWS_REGION = "us-east-1"
-    AWS_ENVIRONMENT = "ci"
   }
   args = [ "cd test/aws && make keys init validate" ]
 }
