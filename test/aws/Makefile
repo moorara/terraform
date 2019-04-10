@@ -22,29 +22,29 @@ validate:
 	@ terraform validate \
 	    -var owner=$(shell whoami) \
 	    -var git_commit=$(shell git rev-parse --short HEAD) \
-			-var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
-			-var git_repo="https://$(host)/$(repo)"
+	    -var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
+	    -var git_repo="https://$(host)/$(repo)"
 
 plan:
 	@ terraform plan \
 	    -var owner=$(shell whoami) \
 	    -var git_commit=$(shell git rev-parse --short HEAD) \
-			-var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
-			-var git_repo="https://$(host)/$(repo)"
+	    -var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
+	    -var git_repo="https://$(host)/$(repo)"
 
 apply:
 	@ terraform apply \
 	    -var owner=$(shell whoami) \
 	    -var git_commit=$(shell git rev-parse --short HEAD) \
-			-var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
-			-var git_repo="https://$(host)/$(repo)"
+	    -var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
+	    -var git_repo="https://$(host)/$(repo)"
 
 destroy:
 	@ terraform destroy \
 	    -var owner=$(shell whoami) \
 	    -var git_commit=$(shell git rev-parse --short HEAD) \
-			-var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
-			-var git_repo="https://$(host)/$(repo)"
+	    -var git_branch=$(shell git rev-parse --abbrev-ref HEAD) \
+	    -var git_repo="https://$(host)/$(repo)"
 
 
 .PHONY: clean
