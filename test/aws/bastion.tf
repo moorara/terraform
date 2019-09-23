@@ -17,7 +17,7 @@ data "aws_ami" "debian" {
 # https://www.terraform.io/docs/providers/aws/r/key_pair.html
 resource "aws_key_pair" "bastion" {
   key_name   = "${var.name}-${var.environment}-bastion"
-  public_key = "${file("${path.module}/${var.environment}-bastion.pub")}"
+  public_key = file("${path.module}/${var.environment}-bastion.pub")
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_instance_profile.html
@@ -46,12 +46,9 @@ resource "aws_iam_role" "bastion" {
 }
 EOF
 
-  tags = "${merge(
-    local.common_tags,
-    map(
-      "Name", "${var.name}-bastion",
-    )
-  )}"
+  tags = merge(local.common_tags, map(
+    "Name", "${var.name}-bastion",
+  ))
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
@@ -99,13 +96,10 @@ resource "aws_cloudwatch_log_group" "bastion" {
   name              = "${var.name}-${var.environment}-bastion"
   retention_in_days = 30
 
-  tags = "${merge(
-    local.common_tags,
-    map(
-      "Name",   "${var.name}-bastion",
-      "Region", "${var.region}"
-    )
-  )}"
+  tags = merge(local.common_tags, map(
+    "Name",   "${var.name}-bastion",
+    "Region", var.region
+  ))
 }
 
 # https://www.terraform.io/docs/providers/aws/r/launch_configuration.html
@@ -128,7 +122,7 @@ resource "aws_launch_configuration" "bastion" {
 resource "aws_autoscaling_group" "bastion" {
   name                 = "${var.name}-${var.environment}-bastion"
   launch_configuration = "${aws_launch_configuration.bastion.name}"
-  vpc_zone_identifier  = [ "${aws_subnet.primary.*.id}" ]
+  vpc_zone_identifier  = "${aws_subnet.primary.*.id}"
   termination_policies = [ "OldestInstance" ]
 
   min_size         = 1
@@ -143,37 +137,37 @@ resource "aws_autoscaling_group" "bastion" {
 
   tag {
     key                 = "Environment"
-    value               = "${var.environment}"
+    value               = var.environment
     propagate_at_launch = true
   }
 
   tag {
     key                 = "Region"
-    value               = "${var.region}"
+    value               = var.region
     propagate_at_launch = true
   }
 
   tag {
     key                 = "Owner"
-    value               = "${var.owner}"
+    value               = var.owner
     propagate_at_launch = true
   }
 
   tag {
     key                 = "GitCommit"
-    value               = "${var.git_commit}"
+    value               = var.git_commit
     propagate_at_launch = true
   }
 
   tag {
     key                 = "GitBranch"
-    value               = "${var.git_branch}"
+    value               = var.git_branch
     propagate_at_launch = true
   }
 
   tag {
     key                 = "GitRepo"
-    value               = "${var.git_repo}"
+    value               = var.git_repo
     propagate_at_launch = true
   }
 
@@ -205,7 +199,7 @@ resource "aws_security_group" "bastion" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks =  [ "${var.whitelist}" ]
+    cidr_blocks = var.whitelist
   }
 
   egress {
@@ -222,13 +216,10 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = [ "${aws_vpc.primary.cidr_block}" ]
   } */
 
-  tags = "${merge(
-    local.common_tags,
-    map(
-      "Name",   "${var.name}-bastion",
-      "Region", "${var.region}"
-    )
-  )}"
+  tags = merge(local.common_tags, map(
+    "Name",   "${var.name}-bastion",
+    "Region", var.region
+  ))
 
   lifecycle {
     create_before_destroy = true

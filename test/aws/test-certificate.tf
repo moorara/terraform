@@ -1,7 +1,7 @@
 # Terraform test files should be self-contained and contain all variables, locals, outputs, data, and resources.
 
 variable "domain" {
-  type = "string"
+  type = string
 }
 
 locals {
@@ -12,15 +12,12 @@ locals {
 module "certificate" {
   source = "../../modules/aws/certificate"
 
-  domain           = "${var.domain}"
-  cert_domain      = "${local.domain}"
+  domain           = var.domain
+  cert_domain      = local.domain
   cert_alt_domains = [ "api.${local.domain}", "dev.${local.domain}" ]
 
-  common_tags = "${merge(
-    local.common_tags,
-    map(
-      "Name",   "${var.name}",
-      "Region", "${var.region}"
-    )
-  )}"
+  common_tags = merge(local.common_tags, map(
+    "Name",   var.name,
+    "Region", var.region
+  ))
 }

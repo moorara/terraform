@@ -1,16 +1,13 @@
 # https://www.terraform.io/docs/providers/aws/r/vpc.html
 resource "aws_vpc" "primary" {
-  cidr_block           = "${lookup(var.vpc_cidrs, var.region)}"
+  cidr_block           = lookup(var.vpc_cidrs, var.region)
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags = "${merge(
-    local.common_tags,
-    map(
-      "Name",   "${var.name}",
-      "Region", "${var.region}"
-    )
-  )}"
+  tags = merge(local.common_tags, map(
+    "Name",   var.name,
+    "Region", var.region
+  ))
 }
 
 # https://www.terraform.io/docs/providers/aws/r/subnet.html
@@ -21,26 +18,20 @@ resource "aws_subnet" "primary" {
   cidr_block              = "${cidrsubnet(aws_vpc.primary.cidr_block, 8, count.index)}"
   map_public_ip_on_launch = false
 
-  tags = "${merge(
-    local.common_tags,
-    map(
-      "Name",   "${var.name}-${count.index}",
-      "Region", "${var.region}"
-    )
-  )}"
+  tags = merge(local.common_tags, map(
+    "Name",   "${var.name}-${count.index}",
+    "Region", var.region
+  ))
 }
 
 # https://www.terraform.io/docs/providers/aws/r/internet_gateway.html
 resource "aws_internet_gateway" "primary" {
   vpc_id = "${aws_vpc.primary.id}"
 
-  tags = "${merge(
-    local.common_tags,
-    map(
-      "Name",   "${var.name}",
-      "Region", "${var.region}"
-    )
-  )}"
+  tags = merge(local.common_tags, map(
+    "Name",   var.name,
+    "Region", var.region
+  ))
 }
 
 # https://www.terraform.io/docs/providers/aws/r/route.html
@@ -59,13 +50,10 @@ resource "aws_route_table" "internet" {
     gateway_id = "${aws_internet_gateway.primary.id}"
   }
 
-  tags = "${merge(
-    local.common_tags,
-    map(
-      "Name",   "${var.name}-internet",
-      "Region", "${var.region}"
-    )
-  )}"
+  tags = merge(local.common_tags, map(
+    "Name",   "${var.name}-internet",
+    "Region", var.region
+  ))
 }
 
 # https://www.terraform.io/docs/providers/aws/r/route_table_association.html
@@ -95,13 +83,10 @@ resource "aws_cloudwatch_log_group" "vpc" {
   name              = "${var.name}-${var.environment}-vpc"
   retention_in_days = 30
 
-  tags = "${merge(
-    local.common_tags,
-    map(
-      "Name",   "${var.name}-vpc",
-      "Region", "${var.region}"
-    )
-  )}"
+  tags = merge(local.common_tags, map(
+    "Name",   "${var.name}-vpc",
+    "Region", var.region
+  ))
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_role.html
@@ -124,12 +109,9 @@ resource "aws_iam_role" "vpc" {
 }
 EOF
 
-  tags = "${merge(
-    local.common_tags,
-    map(
-      "Name", "${var.name}-vpc",
-    )
-  )}"
+  tags = merge(local.common_tags, map(
+    "Name", "${var.name}-vpc",
+  ))
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
