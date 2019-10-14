@@ -1,8 +1,7 @@
 # Terraform test files should be self-contained and contain all variables, locals, outputs, data, and resources.
 
 variable "bastion_key_name" {
-  type        = string
-  description = "The path to the public key for bastion hosts"
+  type = string
 }
 
 module "infra" {
