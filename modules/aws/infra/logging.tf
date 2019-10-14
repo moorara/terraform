@@ -34,9 +34,9 @@ resource "aws_iam_role" "vpc" {
 }
 EOF
 
-  tags = merge(var.common_tags, map(
-    "Name", format("%s-vpc", local.name),
-  ))
+  tags = merge(var.common_tags, {
+    "Name" = format("%s-vpc", local.name)
+  })
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
@@ -78,9 +78,9 @@ resource "aws_cloudwatch_log_group" "vpc" {
   name              = "${local.name}-vpc"
   retention_in_days = 90
 
-  tags = merge(var.common_tags, var.region_tag, map(
-    "Name", format("%s-vpc", local.name),
-  ))
+  tags = merge(var.common_tags, var.region_tag, {
+    "Name" = format("%s-vpc", local.name)
+  })
 }
 
 # https://www.terraform.io/docs/providers/aws/r/flow_log.html

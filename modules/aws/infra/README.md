@@ -29,3 +29,17 @@ The deployment can be a _Kubernetes_, _Database_, or any other highly available 
 | `bastion_key_name`     | `string`       |             |
 
 ## Examples
+
+```hcl
+module "infra" {
+  source = "github.com/moorara/terraform/modules/aws/infra"
+
+  az_count           = 3
+  bastion_public_key = "public_key.pub"
+  name               = "test"
+  environment        = "dev"
+  region             = "us-east-1"
+  common_tags        = {}
+  region_tag         = {}
+}
+```

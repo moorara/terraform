@@ -41,9 +41,9 @@ resource "aws_iam_role" "bastion" {
 }
 EOF
 
-  tags = merge(var.common_tags, map(
-    "Name", format("%s-bastion", local.name),
-  ))
+  tags = merge(var.common_tags, {
+    "Name" = format("%s-bastion", local.name)
+  })
 }
 
 # https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
@@ -116,9 +116,9 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = [ "${aws_vpc.primary.cidr_block}" ]
   } */
 
-  tags = merge(var.common_tags, var.region_tag, map(
-    "Name", format("%s-bastion", local.name),
-  ))
+  tags = merge(var.common_tags, var.region_tag, {
+    "Name" = format("%s-bastion", local.name)
+  })
 
   # https://www.terraform.io/docs/configuration/resources.html#lifecycle-lifecycle-customizations
   lifecycle {
@@ -179,7 +179,7 @@ resource "aws_autoscaling_group" "bastion" {
   vpc_zone_identifier  = slice(aws_subnet.public.*.id, 0, local.az_len)
 
   tags = [
-    for k, v in merge(var.common_tags, var.region_tag, { "Name": "${local.name}-bastion" }): {
+    for k, v in merge(var.common_tags, var.region_tag, { "Name" = "${local.name}-bastion" }): {
       key                 = k
       value               = v
       propagate_at_launch = true

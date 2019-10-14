@@ -6,9 +6,9 @@
 resource "aws_vpc" "main" {
   cidr_block = lookup(var.vpc_cidrs, var.region)
 
-  tags = merge(var.common_tags, var.region_tag, map(
-    "Name", local.name,
-  ))
+  tags = merge(var.common_tags, var.region_tag, {
+    "Name" = local.name
+  })
 }
 
 # ================================================================================
@@ -23,9 +23,9 @@ resource "aws_subnet" "public" {
   cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
-  tags = merge(var.common_tags, var.region_tag, map(
-    "Name", format("%s-public-%d", local.name, 1 + count.index),
-  ))
+  tags = merge(var.common_tags, var.region_tag, {
+    "Name" = format("%s-public-%d", local.name, 1 + count.index)
+  })
 }
 
 # https://www.terraform.io/docs/providers/aws/r/subnet.html
@@ -36,9 +36,9 @@ resource "aws_subnet" "private" {
   cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, 100 + count.index)
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
-  tags = merge(var.common_tags, var.region_tag, map(
-    "Name", format("%s-private-%d", local.name, 1 + count.index),
-  ))
+  tags = merge(var.common_tags, var.region_tag, {
+    "Name" = format("%s-private-%d", local.name, 1 + count.index)
+  })
 }
 
 # ================================================================================
@@ -52,9 +52,9 @@ resource "aws_eip" "nat" {
 
   vpc = true
 
-  tags = merge(var.common_tags, var.region_tag, map(
-    "Name", format("%s-%d", local.name, 1 + count.index),
-  ))
+  tags = merge(var.common_tags, var.region_tag, {
+    "Name" = format("%s-%d", local.name, 1 + count.index)
+  })
 }
 
 # ================================================================================
@@ -66,9 +66,9 @@ resource "aws_eip" "nat" {
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
-  tags = merge(var.common_tags, var.region_tag, map(
-    "Name", local.name,
-  ))
+  tags = merge(var.common_tags, var.region_tag, {
+    "Name" = local.name
+  })
 }
 
 # https://www.terraform.io/docs/providers/aws/r/nat_gateway.html
@@ -80,9 +80,9 @@ resource "aws_nat_gateway" "main" {
   allocation_id = element(aws_eip.nat.*.id, count.index)
   subnet_id     = element(aws_subnet.public.*.id, count.index)
 
-  tags = merge(var.common_tags, var.region_tag, map(
-    "Name", format("%s-%d", local.name, 1 + count.index),
-  ))
+  tags = merge(var.common_tags, var.region_tag, {
+    "Name" = format("%s-%d", local.name, 1 + count.index)
+  })
 }
 
 # ================================================================================
@@ -104,9 +104,9 @@ resource "aws_route_table" "public" {
     gateway_id = aws_internet_gateway.main.id
   }
 
-  tags = merge(var.common_tags, var.region_tag, map(
-    "Name", format("%s-public", local.name),
-  ))
+  tags = merge(var.common_tags, var.region_tag, {
+    "Name" = format("%s-public", local.name)
+  })
 }
 
 # https://www.terraform.io/docs/providers/aws/r/route_table_association.html
@@ -124,9 +124,9 @@ resource "aws_route_table" "private" {
 
   vpc_id = aws_vpc.main.id
 
-  tags = merge(var.common_tags, var.region_tag, map(
-    "Name", format("%s-private-%d", local.name, 1 + count.index),
-  ))
+  tags = merge(var.common_tags, var.region_tag, {
+    "Name" = format("%s-private-%d", local.name, 1 + count.index)
+  })
 }
 
 # https://www.terraform.io/docs/providers/aws/r/route_table_association.html
