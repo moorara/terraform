@@ -16,8 +16,7 @@ module "certificate" {
   cert_domain      = local.domain
   cert_alt_domains = [ "api.${local.domain}", "dev.${local.domain}" ]
 
-  common_tags = merge(local.common_tags, map(
-    "Name",   var.name,
-    "Region", var.region
-  ))
+  tags = merge(module.tags.common, module.tags.region, {
+    "Name" = var.name
+  })
 }
