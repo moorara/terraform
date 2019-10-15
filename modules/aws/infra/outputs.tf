@@ -21,6 +21,6 @@ output "elastic_ips" {
 }
 
 output "bastion_key_name" {
-  value       = aws_key_pair.bastion.key_name
+  value       = aws_key_pair.bastion[0].key_name
   description = "The key pair name for bastion hosts."
 }

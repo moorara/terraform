@@ -11,6 +11,7 @@ The deployment can be a _Kubernetes_, _Database_, or any other highly available 
 | `trusted_cidrs`      | `list(string)` | `["0.0.0.0/0"]`            |             |
 | `enable_vpc_logs`    | `bool`         | `false`                    |             |
 | `az_count`           | `number`       | _available zones_          |             |
+| `enable_bastion`     | `bool`         | `true`                     |             |
 | `bastion_public_key` | `string`       |                            |             |
 | `name`               | `string`       |                            |             |
 | `environment`        | `string`       |                            |             |

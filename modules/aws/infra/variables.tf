@@ -43,6 +43,12 @@ variable "az_count" {
   default     = 99  // This is a hack to default to all availability zones
 }
 
+variable "enable_bastion" {
+  type        = bool
+  description = "Whether or not to deploy bastion hosts."
+  default     = true
+}
+
 variable "bastion_public_key" {
   type        = string
   description = "The path to the public key for bastion hosts."
