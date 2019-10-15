@@ -5,7 +5,7 @@
 # https://www.terraform.io/docs/providers/aws/r/key_pair.html
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
 resource "aws_key_pair" "bastion" {
-  count = var.enable_vpc_logs ? 1 : 0
+  count = var.enable_bastion ? 1 : 0
 
   key_name   = "${local.name}-bastion"
   public_key = file(var.bastion_public_key)
@@ -18,7 +18,7 @@ resource "aws_key_pair" "bastion" {
 # https://www.terraform.io/docs/providers/aws/r/iam_instance_profile.html
 # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
 resource "aws_iam_instance_profile" "bastion" {
-  count = var.enable_vpc_logs ? 1 : 0
+  count = var.enable_bastion ? 1 : 0
 
   name = "${local.name}-bastion"
   role = aws_iam_role.bastion[0].name
@@ -27,7 +27,7 @@ resource "aws_iam_instance_profile" "bastion" {
 # https://www.terraform.io/docs/providers/aws/r/iam_role.html
 # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html
 resource "aws_iam_role" "bastion" {
-  count = var.enable_vpc_logs ? 1 : 0
+  count = var.enable_bastion ? 1 : 0
 
   name = "${local.name}-bastion"
 
@@ -54,7 +54,7 @@ EOF
 
 # https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
 resource "aws_iam_role_policy" "bastion" {
-  count = var.enable_vpc_logs ? 1 : 0
+  count = var.enable_bastion ? 1 : 0
 
   name = "${local.name}-bastion"
   role = aws_iam_role.bastion[0].id
@@ -82,7 +82,7 @@ EOF
 # https://www.terraform.io/docs/providers/aws/r/security_group.html
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html
 resource "aws_security_group" "bastion" {
-  count = var.enable_vpc_logs ? 1 : 0
+  count = var.enable_bastion ? 1 : 0
 
   name   = "${local.name}-bastion"
   vpc_id = aws_vpc.main.id
@@ -160,7 +160,7 @@ data "aws_ami" "debian" {
 # https://www.terraform.io/docs/providers/aws/r/launch_configuration.html
 # https://docs.aws.amazon.com/autoscaling/ec2/userguide/LaunchConfiguration.html
 resource "aws_launch_configuration" "bastion" {
-  count = var.enable_vpc_logs ? 1 : 0
+  count = var.enable_bastion ? 1 : 0
 
   name                        = "${local.name}-bastion"
   image_id                    = data.aws_ami.debian.id
@@ -183,7 +183,7 @@ resource "aws_launch_configuration" "bastion" {
 # https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html
 # https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html
 resource "aws_autoscaling_group" "bastion" {
-  count = var.enable_vpc_logs ? 1 : 0
+  count = var.enable_bastion ? 1 : 0
 
   name                 = "${local.name}-bastion"
   min_size             = 1
