@@ -43,6 +43,18 @@ variable "az_count" {
   default     = 99  // This is a hack to default to all availability zones
 }
 
+variable "enable_public_subnets" {
+  type        = bool
+  description = "Whether or not to deploy public subnets."
+  default     = true
+}
+
+variable "enable_private_subnets" {
+  type        = bool
+  description = "Whether or not to deploy private subnets."
+  default     = true
+}
+
 variable "enable_bastion" {
   type        = bool
   description = "Whether or not to deploy bastion hosts."

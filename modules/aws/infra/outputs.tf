@@ -6,13 +6,13 @@ output "vpc_cidr" {
 }
 
 output "public_subnet_cidrs" {
-  value       = zipmap(aws_subnet.public.*.availability_zone, aws_subnet.public.*.cidr_block)
-  description = "A map of availability zones to CIDR blocks for the public subnets."
+  value       = aws_subnet.public.*.cidr_block
+  description = "A list of CIDR blocks for the public subnets."
 }
 
 output "private_subnet_cidrs" {
-  value       = zipmap(aws_subnet.private.*.availability_zone, aws_subnet.private.*.cidr_block)
-  description = "A map of availability zones to CIDR blocks for the private subnets."
+  value       = aws_subnet.private.*.cidr_block
+  description = "A list of CIDR blocks for the private subnets."
 }
 
 output "elastic_ips" {
