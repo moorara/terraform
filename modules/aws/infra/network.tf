@@ -33,7 +33,7 @@ resource "aws_subnet" "private" {
   count = var.enable_private_subnets ? local.az_len : 0
 
   vpc_id            = aws_vpc.main.id
-  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, 100 + count.index)
+  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, 128 + count.index)
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = merge(var.common_tags, var.region_tag, {
@@ -127,6 +127,11 @@ resource "aws_route_table" "private" {
   count = var.enable_private_subnets ? local.az_len : 0
 
   vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = element(aws_nat_gateway.main.*.id, count.index)
+  }
 
   tags = merge(var.common_tags, var.region_tag, {
     "Name" = format("%s-private-%d", local.name, 1 + count.index)
