@@ -8,17 +8,17 @@ jobs:
       - uses: actions/checkout@master
       - name: Configure Terraform
         shell: bash
+        working-directory: ./test/aws
         env:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-          AWS_REGION: us-east-1
         run: |
-          echo "access_key  = \"$AWS_ACCESS_KEY\"" >  ./test/aws/terraform.tfvars
-          echo "secret_key  = \"$AWS_SECRET_KEY\"" >> ./test/aws/terraform.tfvars
-          echo "region      = \"$AWS_REGION\""     >> ./test/aws/terraform.tfvars
-          echo 'name        = "ci"'                >> ./test/aws/terraform.tfvars
-          echo 'environment = "test"'              >> ./test/aws/terraform.tfvars
-          echo 'domain      = "example.com"'       >> ./test/aws/terraform.tfvars
-      - name: Terraform Validate
+          echo "access_key  = \"$AWS_ACCESS_KEY\"" >  terraform.tfvars
+          echo "secret_key  = \"$AWS_SECRET_KEY\"" >> terraform.tfvars
+          echo 'region      = "us-east-1"'         >> terraform.tfvars
+          echo 'name        = "ci"'                >> terraform.tfvars
+          echo 'environment = "test"'              >> terraform.tfvars
+          echo 'domain      = "example.com"'       >> terraform.tfvars
+      - name: Validate AWS Test
         working-directory: ./test/aws
         run: make keys init validate
