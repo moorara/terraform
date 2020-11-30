@@ -10,7 +10,7 @@ variable "owner" {
 
 variable "git_url" {
   type    = string
-  default = "https://github.com/moorara/terraform/tree/master/test/aws"
+  default = "https://github.com/moorara/terraform/tree/main/test/aws"
 }
 
 variable "git_branch" {
